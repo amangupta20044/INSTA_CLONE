@@ -32,7 +32,10 @@ async function registerController(req,res){
         username : user.username
     },process.env.JWT_SECRET,
         {expiresIn:"7d"})
-        res.cookie("token",token)
+        res.cookie("token", token, {
+            httpOnly: true,
+            path: "/"
+        })
 
         res.status(201).json({
             message:"user registered successfully",
@@ -53,7 +56,7 @@ async function loginController(req,res){
         {username:username},
         {email:email}
     ]
-   })
+   }).select("+password")// password ko select karo kyuki model me select false hai
    if(!user){
          return res.status(404).json({
             message:"user not found"
@@ -73,7 +76,10 @@ async function loginController(req,res){
             process.env.JWT_SECRET,
             {expiresIn:"7d"}
         )
-        res.cookie("token",token)
+        res.cookie("token", token, {
+            httpOnly: true,
+            path: "/"
+        })
 
         res.status(200).json({
             message:"user logedIn successfully",
