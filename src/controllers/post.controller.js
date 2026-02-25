@@ -31,7 +31,7 @@ async function createPostController(req, res) {
 
 }
 async function getPostController(req, res) {
-    
+
     const userId = req.user.id
 
     const posts = await postModel.find({
@@ -44,56 +44,69 @@ async function getPostController(req, res) {
 }
 
 async function getPostDetailController(req, res) {
-   
+
     const userId = req.user.id
     const postId = req.params.postId
     const post = await postModel.findById(postId)
 
-    if(!post){
+    if (!post) {
         return res.status(404).json({
-            message:"post not found"
+            message: "post not found"
         })
     }
     const isValidUser = post.user.toString() === userId
-    if(!isValidUser){
+    if (!isValidUser) {
         return res.status(403).json({
-            message:"forbidded content"
+            message: "forbidded content"
         })
     }
     return res.status(400).json({
-        message:"post fetched successfully",
+        message: "post fetched successfully",
         post
-        
+
     })
 }
 
-async function likePostController(req,res){
+async function likePostController(req, res) {
     const userId = req.user.id
     const postId = req.params.postId
     const post = await postModel.findById(postId)
 
-    if(!post){
+    if (!post) {
         return res.status(404).json({
-            message:"post not found"
+            message: "post not found"
         })
     }
     const like = await likeModel.create({
-        post:postId,
-        user:userId
+        post: postId,
+        user: userId
     })
     res.status(201).json({
-        message:"post liked successfully",
+        message: "post liked successfully",
         like
     })
 }
 
-async function getFeedController(req,res){
-    const posts = await postModel.find().populate("user").sort({createdAt:-1})
-    res.status(200).json({
-        message:"feed fetched successfully",
-        posts
-    })
+async function getFeedController(req, res) {
+    try {
+        const posts = await postModel
+            .find()
+            .populate("user")
+            .sort({ _id: -1 }); // Newest first
+
+        res.status(200).json({
+            message: "Feed fetched successfully",
+            posts,
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: "Failed to fetch feed",
+            error: error.message,
+        });
+    }
 }
+
+
 module.exports = {
     createPostController,
     getPostController,
